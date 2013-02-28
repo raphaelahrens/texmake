@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mk_fd="~/bin/tex_Makefile"
+
+make -f $mk_fd $* 
