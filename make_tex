@@ -2,4 +2,4 @@
 
 mk_fd="~/git/tex_makefile/tex_Makefile"
 
-make -f $mk_fd $* 
+gmake -f $mk_fd $* 
