@@ -32,7 +32,7 @@
 
 # $Id: Makefile,v 1.18 2006-06-19 10:58:11 mairas Exp $
 
-LATEX	= pdflatex
+LATEX	= xelatex
 BIBTEX	= bibtex
 MAKEINDEX = makeindex
 MAKEGLOSSARY = makeglossaries
@@ -42,8 +42,9 @@ DVIPDF  = dvipdft
 L2H	= latex2html
 GH	= gv
 EPSTOPDF = epstopdf
-UXFTOEPS= java -jar /usr/local/opt/Umlet/umlet.jar
+JAVA	= /usr/local/linux-sun-jre1.7.0/bin/java
 DIATOEPS= dia
+SVGTOEPS= inkscape
 
 RERUN = "(There were undefined references|Rerun to get (cross-references|the bars) right)"
 RERUNBIB = "No file.*\.bbl|Citation.*undefined"
@@ -68,8 +69,8 @@ EPS_SRC	:= $(shell ls *.eps)
 EPS	= $(EPS_SRC:%.eps=%.pdf)
 DIA_SRC	:= $(shell ls *.dia)
 DIA	= $(DIA_SRC:%.dia=%.eps)
-UXF_SRC	:= $(shell ls *.uxf)
-UXF	= $(UXF_SRC:%.uxf=%.eps)
+SVG_SRC	:= $(shell ls *.svg)
+SVG	= $(SVG_SRC:%.svg=%.pdf)
 
 # These are not
 
@@ -115,11 +116,11 @@ define manconf
 	mandeps=`if test -r $(basename $@).cnf ; then cat $(basename $@).cnf |tr -d '\n\r' ; fi`
 endef
 
-all	: clean_targets dia uxf eps $(PDF) 
+all	: clean_targets dia svg $(PDF) 
 
 dia	: $(DIA)
 
-uxf	: $(UXF)
+svg	: $(SVG)
 
 eps	: $(EPS)
 
@@ -129,19 +130,19 @@ clean_targets	:
 	-rm -f $(TRG) $(PSF) $(PDF) 
 
 clean	: clean_targets
-	  -rm -f $(UXF) $(EPS) $(DIA) $(TRG:%.dvi=%.aux) $(TRG:%.dvi=%.bbl) $(TRG:%.dvi=%.blg) $(TRG:%.dvi=%.log) $(TRG:%.dvi=%.out) $(TRG:%.dvi=%.idx) $(TRG:%.dvi=%.ilg) $(TRG:%.dvi=%.ind) $(TRG:%.dvi=%.toc) $(TRG:%.dvi=%.d)
+	  -rm -f $(TRG:%.dvi=%.aux) $(TRG:%.dvi=%.bbl) $(TRG:%.dvi=%.blg) $(TRG:%.dvi=%.log) $(TRG:%.dvi=%.out) $(TRG:%.dvi=%.idx) $(TRG:%.dvi=%.ilg) $(TRG:%.dvi=%.ind) $(TRG:%.dvi=%.toc) $(TRG:%.dvi=%.d)
 
 veryclean	: clean
-	  -rm -f *.log *.aux *.dvi *.bbl *.blg *.ilg *.toc *.lof *.lot *.idx *.ind *.ps *.nav *.snm *~
+	  -rm -f $(EPS) $(DIA) *.log *.aux *.dvi *.bbl *.blg *.ilg *.toc *.lof *.lot *.idx *.ind *.ps *.nav *.snm *~
 
 # This is a rule to generate a file of prerequisites for a given .tex file
 %.d	: %.tex
 	$(get_dependencies) ; echo $$deps ; \
 	$(getbibs) ; echo $$bibs ; \
-	$(geteps) ; echo $$epses ; \
 	$(manconf) ; echo  $$mandeps  ;\
 	echo "$*.dvi $@ : $< $$deps $$bibs $$epses $$mandeps" > $@ 
 #include $(SRC:.tex=.d)
+	#$(geteps) ; echo $$epses ; \
 
 # $(DEP) $(EPSPICS) $(BIBFILE)
 $(TRG)	: %.dvi : %.tex
@@ -151,11 +152,11 @@ $(PSF)	: %.ps : %.dvi
 	  @$(DVIPS) $< -o $@
 
 $(EPS)	: %.pdf : %.eps
-	  @$(EPSTOPDF) $< --outfile=$@
+	  $(EPSTOPDF) $< --outfile=$@
 $(DIA)	: %.eps: %.dia
-	  @$(DIATOEPS) $< --export=$@ --filter=eps
-$(UXF)	: %.eps: %.uxf
-	  @$(UXFTOEPS) -action=convert -format=eps -filename=$< -output=$@
+	  $(DIATOEPS) $< --export=$@ --filter=eps
+$(SVG)	: %.pdf: %.svg
+	  $(SVGTOEPS) -f $< -A $@
 
 #$(PDF)  : %.pdf : %.dvi
 #	  @$(DVIPDF) -o $@ $<
@@ -170,7 +171,7 @@ showdvi	: $(TRG)
 	  @for i in $(TRG) ; do $(VIEWER) $$i & done
 
 showpdf	: $(PDF)
-	  @for i in $(PDF) ; do $(VIEWER) $$i & done
+	  @for i in $(PDF) ; do $(VIEWER) $$i > /dev/null & done
 
 showps	: $(PSF)
 	  @for i in $(PSF) ; do $(GH) $$i & done
