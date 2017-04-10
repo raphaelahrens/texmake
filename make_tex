@@ -1,5 +1,5 @@
 #!/bin/sh
 
-mk_fd="~/git/tex_makefile/tex_Makefile"
+mk_fd="~/git/texmake/tex_Makefile"
 
 gmake -f $mk_fd $* 
