@@ -1,5 +1,9 @@
 #!/bin/sh
 
-mk_fd="~/git/texmake/tex_Makefile"
+mk_fd="/home/tant/git/texmake/tex_Makefile"
 
-gmake -f $mk_fd $* 
+if hash gmake ; then
+    gmake -f "$mk_fd" "$@" 
+else
+    make  -f "$mk_fd" "$@" 
+fi
