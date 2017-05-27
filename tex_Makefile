@@ -171,7 +171,7 @@ showdvi	: $(TRG)
 	  @for i in $(TRG) ; do $(VIEWER) $$i & done
 
 showpdf	: $(PDF)
-	  @for i in $(PDF) ; do $(VIEWER) $$i > /dev/null & done
+	  @for i in $(PDF) ; do $(VIEWER) $$i > /dev/null 2>&1 & done
 
 showps	: $(PSF)
 	  @for i in $(PSF) ; do $(GH) $$i & done
